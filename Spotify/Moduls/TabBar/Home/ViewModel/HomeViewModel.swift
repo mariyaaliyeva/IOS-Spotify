@@ -39,6 +39,7 @@ final class HomeViewModel: NSObject {
 					}
 				}) {
 					self?.sections[index] = .newRelesedAlbums(title: "New_released_albums".localized, datamodel: result)
+					completion(result)
 				}
 			case .failure(_):
 				completion([])

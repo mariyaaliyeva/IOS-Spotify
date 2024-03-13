@@ -49,7 +49,7 @@ final class HomeViewController: UIViewController {
 	
 	private func setupNavigationBar() {
 		
-		title = "Home"
+		title = "Home".localized
 		navigationController?.navigationBar.prefersLargeTitles = true
 		navigationItem.largeTitleDisplayMode = .automatic
 		
@@ -92,33 +92,33 @@ final class HomeViewController: UIViewController {
 	
 	private func setupViewModel() {
 		viewModel = HomeViewModel()
-	//	collectionView.showAnimatedGradientSkeleton()
+		collectionView.showAnimatedGradientSkeleton(
+			usingGradient: .init(baseColor: .skeletonDefault),
+			animation: nil,
+			transition: .crossDissolve(0.25))
 		viewModel?.didLoad()
 		
 		let group = DispatchGroup()
 		
 		group.enter()
 		self.viewModel?.loadNewRealisedAlbums(completion: { [weak self] result in
-			self?.collectionView.reloadData()
+			group.leave()
 		})
-		group.leave()
 		
 		group.enter()
 		self.viewModel?.loadFeaturedPlaylists(completion: { [weak self] result  in
-			self?.collectionView.reloadData()
+			group.leave()
 		})
-		group.leave()
-		
+
 		group.enter()
 		self.viewModel?.loadRecommended(completion: { [weak self] result in
-			self?.collectionView.reloadData()
+			group.leave()
 		})
-		group.leave()
-		
+
 		group.notify(queue: .main) {
 			DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-//				self.collectionView.stopSkeletonAnimation()
-//				self.collectionView.hideSkeleton(reloadDataAfter: true, transition: .crossDissolve(0.25))
+				self.collectionView.stopSkeletonAnimation()
+				self.collectionView.hideSkeleton(reloadDataAfter: true, transition: .crossDissolve(0.25))
 				self.collectionView.reloadData()
 			}
 		}

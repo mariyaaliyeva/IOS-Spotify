@@ -67,6 +67,11 @@ final class CustomCollectionViewCell: UICollectionViewCell {
 		super.prepareForReuse()
 		albumImageView.image = nil
 		albumNameLabel.text = nil
+		if contentView.sk.isSkeletonActive {
+			isSkeletonable = false
+			contentView.isSkeletonable = false
+			contentView.hideSkeleton()
+		}
 	}
 	
 	//MARK: - Public
