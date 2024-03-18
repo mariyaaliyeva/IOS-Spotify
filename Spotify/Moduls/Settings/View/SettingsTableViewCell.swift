@@ -18,7 +18,7 @@ final class SettingsTableViewCell: UITableViewCell {
 	
 	private var profile: UIButton = {
 		let button = UIButton(type: .system)
-		button.setTitle("View Your Profile", for: .normal)
+		button.setTitle("View_Your_Profile".localized, for: .normal)
 		button.backgroundColor = #colorLiteral(red: 1, green: 0.8235294118, blue: 0.8431372549, alpha: 1)
 		button.setTitleColor(.black, for: .normal)
 		button.titleLabel?.font = UIFont(name: "HelveticaNeue", size: 15)
@@ -28,7 +28,7 @@ final class SettingsTableViewCell: UITableViewCell {
 	
 	private var signOut: UIButton = {
 		let button = UIButton(type: .system)
-		button.setTitle("Sign Out", for: .normal)
+		button.setTitle("Sign_Out".localized, for: .normal)
 		button.backgroundColor = .white
 		button.setTitleColor(.black, for: .normal)
 		button.titleLabel?.font = UIFont(name: "HelveticaNeue", size: 13)

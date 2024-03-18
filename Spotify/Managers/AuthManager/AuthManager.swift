@@ -10,7 +10,9 @@ import SwiftKeychainWrapper
 import Moya
 
 final class AuthManager {
+	
 	static let shared = AuthManager()
+	private var authRepository: AuthRepositoryProtocol = AuthRepository()
 	
 	private let provider = MoyaProvider<AuthTarget>(
 		plugins: [
@@ -44,11 +46,11 @@ final class AuthManager {
 	private init() {}
 	
 	private var accessToken: String? {
-		return KeychainWrapper.standard.string(forKey: "accessToken")
+		return authRepository.getAccessToken()
 	}
 	
 	private var refreshToken: String? {
-		return KeychainWrapper.standard.string(forKey: "refreshToken")
+		return authRepository.getRefreshToken()
 	}
 	
 	private var tokenExpirationDate: Date? {
@@ -135,18 +137,19 @@ final class AuthManager {
 	}
 	
 	private func cacheToken(result: AuthResponse) {
-		KeychainWrapper.standard.set(result.accessToken, forKey: "accessToken")
+		authRepository.save(accessToken: result.accessToken)
 		
 		if let refreshToken = result.refreshToken {
-			KeychainWrapper.standard.set(refreshToken, forKey: "refreshToken")
+			
+			guard let refreshTokenKey = result.refreshToken else { return }
+			authRepository.save(refreshToken: refreshTokenKey)
 		}
 		
 		UserDefaults.standard.set(Date().addingTimeInterval(TimeInterval(result.expiresIn)), forKey: "expirationDate")
 	}
 	
 	func signOut(completion: (Bool) -> Void) {
-		KeychainWrapper.standard.remove(forKey: "accessToken")
-		KeychainWrapper.standard.remove(forKey: "refreshToken")
+		authRepository.removeAllTokens()
 		UserDefaults.standard.setValue(nil,
 																	 forKey: "expirationDate")
 		

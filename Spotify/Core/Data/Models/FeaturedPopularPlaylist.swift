@@ -10,7 +10,7 @@
 import Foundation
 
 struct FeaturedPlaylistsResponse: Codable {
-	let playlists: PlaylistResponse
+	let playlists: PlaylistResponse?
 }
 
 struct PlaylistResponse: Codable {
@@ -18,12 +18,13 @@ struct PlaylistResponse: Codable {
 }
 
 struct Playlists: Codable {
-	let description: String?
-	let external_urls: [String: String]?
 	let id: String?
 	let images: [Image]?
 	let name: String?
-	let owner: User?
+	
+	enum CodingKeys: String, CodingKey {
+		case id, images, name
+	}
 }
 
 struct User: Codable {

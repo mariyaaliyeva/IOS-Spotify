@@ -1,16 +1,13 @@
 //
-//  RecomendedCollectionViewCell.swift
+//  PlaylistTableViewCell.swift
 //  Spotify
 //
-//  Created by Mariya Aliyeva on 06.03.2024.
+//  Created by Mariya Aliyeva on 16.03.2024.
 //
 
 import UIKit
-import SkeletonView
 
-final class RecomendedCollectionViewCell: UICollectionViewCell {
-	
-	static let reuseId = "RecomendedCollectionViewCell"
+final class PlaylistTableViewCell: UITableViewCell {
 	
 	// MARK: - Consraints
 	
@@ -23,9 +20,10 @@ final class RecomendedCollectionViewCell: UICollectionViewCell {
 	
 	// MARK: - UIView
 	
-	private lazy var musicImage = ImageFactory.createImage(
-		isSkeletonable: true,
-		skeletonCornerRadius: 24
+	lazy var numberLabel = LabelFactory.createLabel(
+		font: UIFont(name: "Inter-Regular", size: 13),
+		textColor: #colorLiteral(red: 0.713041544, green: 0.713041544, blue: 0.713041544, alpha: 1),
+		isSkeletonable: true
 	)
 
 	private lazy var textsStackView = StackViewFactory.createStackView(
@@ -36,22 +34,20 @@ final class RecomendedCollectionViewCell: UICollectionViewCell {
 		font: UIFont(name: "Inter-Regular", size: 16),
 		isSkeletonable: true
 	)
-
+	
 	private lazy var subtitleLabel = LabelFactory.createLabel(
 		font: UIFont(name: "Inter-Regular", size: 13),
 		textColor: #colorLiteral(red: 0.713041544, green: 0.713041544, blue: 0.713041544, alpha: 1),
 		isSkeletonable: true
 	)
-
+	
 	private lazy var rightView = ImageFactory.createImage(
 		contentMode: .scaleToFill,
 		image: UIImage(named: "icon_right")
 	)
 	
-	// MARK: - Lifecycle
-	override init(frame: CGRect) {
-		super.init(frame: frame)
-		backgroundColor = #colorLiteral(red: 0.06274510175, green: 0, blue: 0.1921568662, alpha: 1)
+	override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+		super.init(style: style, reuseIdentifier: reuseIdentifier)
 		setupViews()
 	}
 	
@@ -59,42 +55,54 @@ final class RecomendedCollectionViewCell: UICollectionViewCell {
 		fatalError("init(coder:) has not been implemented")
 	}
 	
-	override func layoutSubviews() {
-		super.layoutSubviews()
-		musicImage.layer.cornerRadius = Consraints.musicImageCornerRadius
-	}
-	
 	// MARK: - Public
 	func configure(data: Track) {
 		self.titleLabel.text = data.name
-		self.subtitleLabel.text = data.album?.name
-		let url = URL(string: data.album?.images?.first?.url ?? "")
-		self.musicImage.kf.setImage(with: url)
+		let msDuration: Double = Double(data.durationMS ?? 1)
+		let secDuration = msDuration / 1000
+		let durationConvert = secDuration.asString(style: .abbreviated)
+		if data.durationMS != nil {
+			self.subtitleLabel.text = "\(durationConvert)"
+		} else {
+			subtitleLabel.isHidden = true
+		}
+	}
+	
+	func configure(data: PlaylistItem) {
+		self.titleLabel.text = data.track?.name
+		let msDuration: Double = Double(data.track?.durationMS ?? 1)
+		let secDuration = msDuration / 1000
+		let durationConvert = secDuration.asString(style: .abbreviated)
+		if data.track?.durationMS != nil {
+			self.subtitleLabel.text = "\(durationConvert)"
+		} else {
+			subtitleLabel.isHidden = true
+		}
 	}
 	
 	// MARK: - SetupViews
 	
 	private func setupViews() {
-		isSkeletonable = true
 		contentView.backgroundColor = .black
+		selectionStyle = .none
 		
 		[titleLabel, subtitleLabel].forEach {
 			textsStackView.addArrangedSubview($0)
 		}
 		
-		[musicImage, textsStackView, rightView].forEach {
+		[numberLabel, textsStackView, rightView].forEach {
 			contentView.addSubview($0)
 		}
 		
-		musicImage.snp.makeConstraints { make in
-			make.left.equalToSuperview().inset(12)
-			make.top.bottom.equalToSuperview().inset(8)
-			make.size.equalTo(Consraints.musicImageSize)
+		numberLabel.snp.makeConstraints { make in
+			make.leading.equalToSuperview().inset(12)
+			make.centerY.equalToSuperview()
+			make.width.equalTo(25)
 		}
-		
+				
 		textsStackView.snp.makeConstraints { make in
-			make.left.equalTo(musicImage.snp.right).offset(12)
-			make.top.bottom.equalTo(musicImage)
+			make.left.equalTo(numberLabel.snp.right).offset(8)
+			make.centerY.equalToSuperview()
 			make.height.greaterThanOrEqualTo(35)
 			make.width.greaterThanOrEqualTo(150)
 		}
@@ -107,3 +115,4 @@ final class RecomendedCollectionViewCell: UICollectionViewCell {
 		}
 	}
 }
+

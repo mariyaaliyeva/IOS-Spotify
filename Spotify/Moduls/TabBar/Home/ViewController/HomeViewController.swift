@@ -8,7 +8,7 @@
 import UIKit
 import SkeletonView
 
-final class HomeViewController: UIViewController {
+final class HomeViewController: BaseViewController {
 	
 	// MARK: - Properties
 	
@@ -54,19 +54,6 @@ final class HomeViewController: UIViewController {
 		navigationItem.largeTitleDisplayMode = .automatic
 		
 		navigationItem.setBackBarItem()
-		let navigationBarAppearance = UINavigationBarAppearance()
-		navigationBarAppearance.configureWithOpaqueBackground()
-		navigationBarAppearance.titleTextAttributes = [
-			NSAttributedString.Key.foregroundColor: UIColor.white
-		]
-		navigationBarAppearance.largeTitleTextAttributes = [
-			NSAttributedString.Key.foregroundColor: UIColor.white
-		]
-		navigationBarAppearance.backgroundColor = .black
-		
-		navigationController?.navigationBar.standardAppearance = navigationBarAppearance
-		navigationController?.navigationBar.compactAppearance = navigationBarAppearance
-		navigationController?.navigationBar.scrollEdgeAppearance = navigationBarAppearance
 		
 		navigationItem.rightBarButtonItem = UIBarButtonItem(
 			image: UIImage(named: "settings_icon"),
@@ -143,7 +130,7 @@ final class HomeViewController: UIViewController {
 
 // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
 
-extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSource, SkeletonCollectionViewDataSource {
+extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSource {
 
 	func numberOfSections(in collectionView: UICollectionView) -> Int {
 		return viewModel?.numberOfSections ?? 1
@@ -208,6 +195,33 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 		}
 	}
 	
+	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+		let type = viewModel?.getSectionViewModel(at: indexPath.section)
+		
+		switch type {
+		case .newRelesedAlbums(_, let dataModel):
+			let album = dataModel[indexPath.row]
+			let viewController = AlbumDetailViewController()
+			viewController.albumId = album.id
+			viewController.isAlbumDetail = true
+			self.navigationController?.pushViewController(viewController, animated: true)
+		case .featuredPlaylists(_, let dataModel):
+			let featuredAlbum = dataModel[indexPath.row]
+			let viewController = AlbumDetailViewController()
+			viewController.playlistId = featuredAlbum.id
+			self.navigationController?.pushViewController(viewController, animated: true)
+		case .recommended(_, let dataModel):
+			break
+		default:
+			break
+		}
+	}
+}
+
+// MARK: - SkeletonCollectionViewDataSource
+
+extension HomeViewController: SkeletonCollectionViewDataSource {
+	
 	func numSections(in collectionSkeletonView: UICollectionView) -> Int {
 			return viewModel?.numberOfSections ?? 1
 	}
@@ -249,9 +263,9 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 	}
 }
 
+// MARK: - CreateCollectionLayout
+
 extension HomeViewController {
-	
-	// MARK: - CreateCollectionLayout
 	
 	private func createCollectionLayout(section: Int) -> NSCollectionLayoutSection {
 		
@@ -263,7 +277,7 @@ extension HomeViewController {
 				heightDimension: .fractionalHeight(1.0))
 			
 			let item = NSCollectionLayoutItem(layoutSize: itemSize)
-			item.contentInsets = .init(top: 2, leading: 2, bottom: 2, trailing: 2)
+			item.contentInsets = .init(top: 2, leading: 4, bottom: 2, trailing: 4)
 			// Group
 			
 			let horizontalGroup = NSCollectionLayoutGroup.horizontal (
@@ -293,7 +307,7 @@ extension HomeViewController {
 				heightDimension: .fractionalHeight(1.0))
 			
 			let item = NSCollectionLayoutItem(layoutSize: itemSize)
-			item.contentInsets = .init(top: 2, leading: 2, bottom: 2, trailing: 2)
+			item.contentInsets = .init(top: 2, leading: 4, bottom: 2, trailing: 4)
 			// Group
 			
 			let horizontalGroup = NSCollectionLayoutGroup.horizontal (
@@ -370,3 +384,5 @@ extension HomeViewController {
 		}
 	}
 }
+
+//0S4pP8MBY9p7ngFWIZQAJv

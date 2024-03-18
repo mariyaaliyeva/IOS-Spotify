@@ -10,14 +10,11 @@ import UIKit
 final class SectionHeader: UICollectionReusableView {
 	
 	// MARK: - UI
-	private lazy var label: UILabel = {
-		let label: UILabel = UILabel()
-		label.textColor = .white
-		label.font = UIFont(name: "Inter-Regular", size: 15)
-		label.sizeToFit()
-		return label
-	}()
 	
+	private lazy var label = LabelFactory.createLabel(
+		font: UIFont(name: "Inter-Regular", size: 15)
+	)
+
 	// MARK: - Lifecycle
 	override init(frame: CGRect) {
 		super.init(frame: frame)

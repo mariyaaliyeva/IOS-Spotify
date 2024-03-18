@@ -41,7 +41,7 @@ final class AlbumsManager {
 			case .success(let response):
 				do {
 					let playlist = try JSONDecoder().decode(FeaturedPlaylistsResponse.self, from: response.data)
-					completion(.success(playlist.playlists.items))
+					completion(.success((playlist.playlists?.items)!))
 				} catch {
 					completion(.failure(.unknown))
 				}
@@ -79,6 +79,38 @@ final class AlbumsManager {
 				}
 			case .failure(_):
 				completion(.failure(.unknown))
+			}
+		}
+	}
+	
+	func getAlbumDetail(albumsID: String, completion: @escaping (APIResult<AlbumDetail>) -> Void) {
+		provider.request(.getAlbumDetail(albumID: albumsID)) { result in
+			switch result {
+			case .success(let response):
+				do {
+					let albums = try JSONDecoder().decode(AlbumDetail.self, from: response.data)
+					completion(.success(albums))
+				} catch {
+					completion(.failure(.unknown))
+				}
+			case .failure(_):
+				completion(.failure(.networkFail))
+			}
+		}
+	}
+	
+	func getPlaylists(playlistID: String, completion: @escaping (APIResult<PlaylistDetailsResponse>) -> Void) {
+		provider.request(.getPlaylists(playlistID: playlistID)) { result in
+			switch result {
+			case .success(let response):
+				do {
+					let playlists = try JSONDecoder().decode(PlaylistDetailsResponse.self, from: response.data)
+					completion(.success(playlists))
+				} catch {
+					completion(.failure(.unknown))
+				}
+			case .failure(_):
+				completion(.failure(.networkFail))
 			}
 		}
 	}
