@@ -1,0 +1,14 @@
+/* 
+  Localizable.strings
+  Spotify
+
+  Created by Mariya Aliyeva on 11.03.2024.
+  
+*/
+
+"New_released_albums" = "Новые выпущенные альбомы";
+"Featured_playlists" = "Избранные плейлисты";
+"Recommended" = "Рекомендуемые";
+"Home" = "Домoй";
+"Search" = "Поиск";
+"Your_Library" = "Библиотека";

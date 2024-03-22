@@ -10,17 +10,13 @@ import Moya
 
 enum AuthTarget {
 	case getAccessToken(code: String)
-	case getRefreshToken(code: String)
+	case getRefreshToken(token: String)
 }
 
-extension AuthTarget: TargetType {
-	
-	var baseURL: URL {
-		return URL(string: "https://accounts.spotify.com/api")!
-	}
+extension AuthTarget: BaseTargetType {
 	
 	var path: String {
-		return "/token"
+			return "/api/token"
 	}
 	
 	var method: Moya.Method {
@@ -35,16 +31,15 @@ extension AuthTarget: TargetType {
 				parameters: [
 					"grant_type": "authorization_code",
 					"code": code,
-					"redirect_uri": "https://open.spotify.com/"
+					"redirect_uri": GlobalConstants.AuthApi.redirectUri
 				],
 				encoding: URLEncoding.default
 			)
-		case .getRefreshToken(let code):
+		case .getRefreshToken(let refreshToken):
 			return .requestParameters(
 				parameters: [
 					"grant_type": "refresh_token",
-					"code": code,
-					"redirect_uri": "https://open.spotify.com/"
+					"refresh_token": refreshToken
 				],
 				encoding: URLEncoding.default
 			)
@@ -54,7 +49,7 @@ extension AuthTarget: TargetType {
 	var headers: [String : String]? {
 		var headers = [String : String]()
 		
-		let authString = "\("2f840d4f818247b4b5badfa7295856ec"):\("d333907cad5441178283782bb89c20c8")"
+		let authString = "\(GlobalConstants.AuthApi.clientId):\(GlobalConstants.AuthApi.clientSecret)"
 		guard let authData = authString.data(using: .utf8) else {
 			print("Failure to get base64")
 			return nil
@@ -65,6 +60,4 @@ extension AuthTarget: TargetType {
 		headers["Content-Type"] = "application/x-www-form-urlencoded"
 		return headers
 	}
-	
-	
 }

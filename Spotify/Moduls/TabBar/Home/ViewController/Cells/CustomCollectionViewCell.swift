@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import Kingfisher
+import SkeletonView
 
 final class CustomCollectionViewCell: UICollectionViewCell {
 	
@@ -24,6 +26,8 @@ final class CustomCollectionViewCell: UICollectionViewCell {
 	private lazy var albumImageView: UIImageView = {
 		let imageView = UIImageView()
 		imageView.contentMode = .scaleAspectFit
+		imageView.isSkeletonable = true
+		imageView.skeletonCornerRadius = 8
 		return imageView
 	}()
 	
@@ -32,9 +36,12 @@ final class CustomCollectionViewCell: UICollectionViewCell {
 		label.textAlignment = .center
 		label.textColor = .white
 		label.font = UIFont(name: "HelveticaNeue", size: 16)
-		label.numberOfLines = 0
+		label.numberOfLines = 2
 		label.lineBreakMode = .byWordWrapping
 		label.sizeToFit()
+		label.layer.masksToBounds = true
+		label.linesCornerRadius = 2
+		label.isSkeletonable = true
 		return label
 	}()
 	
@@ -56,15 +63,35 @@ final class CustomCollectionViewCell: UICollectionViewCell {
 		albumImageView.layer.cornerRadius = Consraints.musicImageCornerRadius
 	}
 	
+	override func prepareForReuse() {
+		super.prepareForReuse()
+		albumImageView.image = nil
+		albumNameLabel.text = nil
+		if contentView.sk.isSkeletonActive {
+			isSkeletonable = false
+			contentView.isSkeletonable = false
+			contentView.hideSkeleton()
+		}
+	}
+	
 	//MARK: - Public
-	func configure(with model: CollectionTableCellModel?) {
-		albumNameLabel.text = model?.title
-		albumImageView.image = UIImage(named: model?.imageName ?? "")
+	func configure(with model: Playlists) {
+		albumNameLabel.text = model.name
+		let url = URL(string: model.images?.first?.url ?? "")
+		self.albumImageView.kf.setImage(with: url)
+	}
+	
+	func configure(with model: PlaylistDataModel) {
+		albumNameLabel.text = model.name
+		let url = URL(string: model.images?.first?.url ?? "")
+		self.albumImageView.kf.setImage(with: url)
 	}
 	
 	// MARK: - Setup Views
 	private func setupViews() {
 		backgroundColor = .clear
+		isSkeletonable = true
+		contentView.isSkeletonable = true
 		contentView.addSubview(albumImageView)
 		contentView.addSubview(albumNameLabel)
 	}
@@ -80,6 +107,8 @@ final class CustomCollectionViewCell: UICollectionViewCell {
 		albumNameLabel.snp.makeConstraints { make in
 			make.top.equalTo(albumImageView.snp.bottom).offset(Consraints.topAlbumNameLabel)
 			make.leading.trailing.equalToSuperview()
+			make.height.greaterThanOrEqualTo(35)
+			make.width.greaterThanOrEqualTo(150)
 		}
 	}
 }

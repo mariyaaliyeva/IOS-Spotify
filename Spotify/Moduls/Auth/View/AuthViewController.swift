@@ -6,7 +6,6 @@
 //
 
 import UIKit
-
 import WebKit
 
 final class AuthViewController: UIViewController {
@@ -75,7 +74,6 @@ extension AuthViewController: WKNavigationDelegate {
 				self?.completionHandler?(success)
 			}
 		})
-
 	}
 }
 

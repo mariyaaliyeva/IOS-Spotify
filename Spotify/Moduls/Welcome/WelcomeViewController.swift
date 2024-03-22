@@ -59,6 +59,7 @@ final class WelcomeViewController: UIViewController {
 				message: "Something went wrong when signin",
 				preferredStyle: .alert)
 			alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel))
+			self.present(alert, animated: true, completion: nil)
 			return
 		}
 		

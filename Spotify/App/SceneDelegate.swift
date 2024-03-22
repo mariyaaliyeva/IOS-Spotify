@@ -16,17 +16,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 		window = UIWindow(windowScene: windowScene)
 		
 		if AuthManager.shared.isSignedIn {
-				let tabbarViewController = MainTabBarController()
-				window?.rootViewController = tabbarViewController
+			AuthManager.shared.refreshIfNeeded(completion: nil)
+			let tabbarViewController = MainTabBarController()
+			window?.rootViewController = tabbarViewController
 		} else {
-				var navigationController = UINavigationController()
-				let welcomeViewController = WelcomeViewController()
-				navigationController = .init(rootViewController: welcomeViewController)
-				navigationController.navigationBar.prefersLargeTitles = true
-				navigationController.viewControllers.first?.navigationItem.largeTitleDisplayMode = .always
-				window?.rootViewController = navigationController
+			var navigationController = UINavigationController()
+			let welcomeViewController = WelcomeViewController()
+			navigationController = .init(rootViewController: welcomeViewController)
+			navigationController.navigationBar.prefersLargeTitles = true
+			navigationController.viewControllers.first?.navigationItem.largeTitleDisplayMode = .always
+			window?.rootViewController = navigationController
 		}
-		
 		window?.makeKeyAndVisible()
 	}
 

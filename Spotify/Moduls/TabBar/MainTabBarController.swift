@@ -9,7 +9,7 @@ import UIKit
 
 final class MainTabBarController: UITabBarController {
 	
-	private let titles: [String] = ["Home", "Search", "Your Library"]
+	private let titles: [String] = ["Home".localized, "Search".localized, "Your_Library".localized]
 	
 	private let icons: [UIImage?] = [
 		UIImage(named: "home_icon"),
