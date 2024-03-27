@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SkeletonView
 
 final class AlbumDetailViewController: BaseViewController {
 	
@@ -15,6 +16,7 @@ final class AlbumDetailViewController: BaseViewController {
 	var albumId: String?
 	var playlistId: String?
 	var isAlbumDetail = false
+	var albumImageUrl: URL?
 	
 	private lazy var albums: [Track] = [] {
 		didSet {
@@ -100,6 +102,7 @@ final class AlbumDetailViewController: BaseViewController {
 		button.setImage(UIImage(named: "play_button"), for: .normal)
 		button.clipsToBounds = true
 		button.addTarget(self, action: #selector(playButtonTapped), for: .touchUpInside)
+		button.isSkeletonable = true
 		return button
 	}()
 	
@@ -108,8 +111,9 @@ final class AlbumDetailViewController: BaseViewController {
 		tableView.dataSource = self
 		tableView.delegate = self
 		tableView.separatorStyle = .none
-		tableView.backgroundColor = .black
+		tableView.backgroundColor = .clear
 		tableView.register(PlaylistTableViewCell.self, forCellReuseIdentifier: "PlaylistTableViewCell")
+		tableView.isSkeletonable = true
 		return tableView
 	}()
 	
@@ -126,25 +130,59 @@ final class AlbumDetailViewController: BaseViewController {
 		setupViews()
 		setupConstraints()
 	}
-	
+
 	override func viewWillLayoutSubviews() {
 		super.viewWillLayoutSubviews()
-		navigationItem.largeTitleDisplayMode = .never
-		navigationController?.navigationBar.prefersLargeTitles = false
 		spotifyImageView.layer.cornerRadius = 12
 		playButton.layer.cornerRadius = 28
 	}
 	
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
+		view.isSkeletonable = true
+		let animation = SkeletonAnimationBuilder().makeSlidingAnimation(withDirection: .leftRight)
+		view.showAnimatedGradientSkeleton(
+			usingGradient: .init(baseColor: .skeletonDefault),
+			animation: animation)
+		tableView.showAnimatedGradientSkeleton(
+			usingGradient: .init(baseColor: .skeletonDefault),
+			animation: nil,
+			transition: .crossDissolve(0.25))
 		setupGradient()
+		
+		DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+			self.view.stopSkeletonAnimation()
+			self.view.hideSkeleton()
+			self.tableView.stopSkeletonAnimation()
+			self.tableView.hideSkeleton(reloadDataAfter: true, transition: .crossDissolve(0.25))
+		}
 	}
 	
+	override func viewWillDisappear(_ animated: Bool) {
+			super.viewWillDisappear(animated)
+			setupNavBar()
+	}
 	// MARK: - Navigation bar
 	
 	private func setupNavigationBar() {
+		let navigationBarAppearance = UINavigationBarAppearance()
+		navigationBarAppearance.configureWithOpaqueBackground()
+		navigationBarAppearance.titleTextAttributes = [
+				NSAttributedString.Key.foregroundColor: UIColor.white
+		]
+		navigationBarAppearance.largeTitleTextAttributes = [
+				NSAttributedString.Key.foregroundColor: UIColor.white
+		]
+		navigationBarAppearance.backgroundColor = UIColor(
+				red: 0.0/255.0,
+				green: 128.0/255.0,
+				blue: 174.0/255.0,
+				alpha: 1
+		)
 		
-		title = "AlbumDetail".localized
+		navigationController?.navigationBar.standardAppearance = navigationBarAppearance
+		navigationController?.navigationBar.compactAppearance = navigationBarAppearance
+		navigationController?.navigationBar.scrollEdgeAppearance = navigationBarAppearance
 	}
 	
 	// MARK: -  Buttons action
@@ -173,6 +211,7 @@ final class AlbumDetailViewController: BaseViewController {
 			switch response {
 			case .success(let result):
 				let url = URL(string: result.images.first?.url ?? "")
+				self?.albumImageUrl = url
 				self?.albumImageView.kf.setImage(with: url)
 				self?.albumNameLabel.text = result.name
 				self?.albums = result.tracks.items
@@ -180,8 +219,7 @@ final class AlbumDetailViewController: BaseViewController {
 				for i in result.tracks.items {
 					sum += i.durationMS ?? 0
 				}
-				var sec = sum / 1000
-				var convertDuration = Double(sec).asString(style: .abbreviated)
+				let convertDuration = Double(sum).asString(style: .abbreviated)
 				self?.timeLabel.text = "\(result.popularity ?? 0) likes • \(convertDuration)"
 			case .failure(_):
 				break
@@ -203,8 +241,7 @@ final class AlbumDetailViewController: BaseViewController {
 				for i in result.tracks.items {
 					sum += i.track?.durationMS ?? 0
 				}
-				var sec = sum / 1000
-				var convertDuration = Double(sec).asString(style: .abbreviated)
+				let convertDuration = Double(sum).asString(style: .abbreviated)
 				self?.timeLabel.text = "\(result.tracks.items.first?.track?.popularity ?? 0) likes • \(convertDuration)"
 			case .failure(_):
 				break
@@ -299,7 +336,7 @@ final class AlbumDetailViewController: BaseViewController {
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
-extension AlbumDetailViewController: UITableViewDelegate, UITableViewDataSource
+extension AlbumDetailViewController: UITableViewDelegate, UITableViewDataSource, SkeletonTableViewDataSource
 {
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 		if isAlbumDetail == true {
@@ -310,22 +347,54 @@ extension AlbumDetailViewController: UITableViewDelegate, UITableViewDataSource
 	}
 	
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		
+		let cell = tableView.dequeueReusableCell(forIndexPath: indexPath) as PlaylistTableViewCell
 		if isAlbumDetail == true {
-			let cell = tableView.dequeueReusableCell(forIndexPath: indexPath) as PlaylistTableViewCell
 			let albums = albums[indexPath.row]
 			cell.configure(data: albums)
-			cell.numberLabel.text = "\(indexPath.row + 1)"
-			return cell
+		} else {
+			let playlist = playlistItem[indexPath.row]
+			cell.configure(data: playlist)
 		}
-		let cell = tableView.dequeueReusableCell(forIndexPath: indexPath) as PlaylistTableViewCell
-		let playlist = playlistItem[indexPath.row]
-		cell.configure(data: playlist)
 		cell.numberLabel.text = "\(indexPath.row + 1)"
 		return cell
 	}
 	
+	func collectionSkeletonView(_ skeletonView: UITableView, numberOfRowsInSection section: Int) -> Int {
+		if isAlbumDetail == true {
+			return albums.count
+		} else {
+			return playlistItem.count
+		}
+	}
+
+	func collectionSkeletonView(
+		_ skeletonView: UITableView,
+		cellIdentifierForRowAt indexPath: IndexPath) -> ReusableCellIdentifier {
+			return PlaylistTableViewCell.reuseID
+	}
+
+	
 	func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
 		return 64
 	}
+	
+	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+		if isAlbumDetail == true {
+			let albums = albums[indexPath.row]
+			let playerViewController = PlayerViewController()
+			playerViewController.track = albums
+			playerViewController.transferFromDetail = true
+			playerViewController.albumImageUrl = albumImageUrl
+			playerViewController.modalPresentationStyle = .overFullScreen
+			present(playerViewController, animated: true)
+		} else {
+			let playlist = playlistItem[indexPath.row]
+			let playerViewController = PlayerViewController()
+			playerViewController.transferFromDetailPlaylisrs = true
+			playerViewController.playlistItem = playlist
+			playerViewController.modalPresentationStyle = .overFullScreen
+			present(playerViewController, animated: true)
+		}
+	}
 }
+

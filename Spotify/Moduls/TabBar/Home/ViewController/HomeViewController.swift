@@ -15,6 +15,7 @@ final class HomeViewController: BaseViewController {
 	var viewModel: HomeViewModel?
 
 	// MARK: - UI
+	
 	private lazy var collectionView: UICollectionView = {
 		let layout = UICollectionViewCompositionalLayout { sectionIndex, _ ->
 			NSCollectionLayoutSection? in
@@ -32,7 +33,15 @@ final class HomeViewController: BaseViewController {
 		collectionView.register(CustomCollectionViewCell.self, forCellWithReuseIdentifier: "CustomCollectionViewCell")
 		collectionView.register(RecomendedCollectionViewCell.self, forCellWithReuseIdentifier: "RecomendedCollectionViewCell")
 		collectionView.isSkeletonable = true
+		collectionView.showsVerticalScrollIndicator = false
 		return collectionView
+	}()
+	
+	private var littlePlayerView: LittlePlayerView = {
+		let view = LittlePlayerView()
+		view.layer.cornerRadius = 4
+		view.isHidden = true
+		return view
 	}()
 	
 	// MARK: - Lifecycle
@@ -75,6 +84,12 @@ final class HomeViewController: BaseViewController {
 		navigationController?.pushViewController(controller, animated: true)
 	}
 	
+	override func setupTitles() {
+		title = "Home".localized
+		viewModel?.setupSectionTitles()
+		collectionView.reloadData()
+	}
+	
 	// MARK: - SetupViewModel()
 	
 	private func setupViewModel() {
@@ -83,39 +98,20 @@ final class HomeViewController: BaseViewController {
 			usingGradient: .init(baseColor: .skeletonDefault),
 			animation: nil,
 			transition: .crossDissolve(0.25))
-		viewModel?.didLoad()
-		
-		let group = DispatchGroup()
-		
-		group.enter()
-		self.viewModel?.loadNewRealisedAlbums(completion: { [weak self] result in
-			group.leave()
+		viewModel?.didLoad(completion: { [weak self] in
+			self?.collectionView.stopSkeletonAnimation()
+			self?.collectionView.hideSkeleton(reloadDataAfter: true, transition: .crossDissolve(0.25))
 		})
-		
-		group.enter()
-		self.viewModel?.loadFeaturedPlaylists(completion: { [weak self] result  in
-			group.leave()
-		})
-
-		group.enter()
-		self.viewModel?.loadRecommended(completion: { [weak self] result in
-			group.leave()
-		})
-
-		group.notify(queue: .main) {
-			DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-				self.collectionView.stopSkeletonAnimation()
-				self.collectionView.hideSkeleton(reloadDataAfter: true, transition: .crossDissolve(0.25))
-				self.collectionView.reloadData()
-			}
-		}
 	}
 	
 	// MARK: - SetupViews
 	
 	private func setupViews() {
 		view.backgroundColor = .black
-		view.addSubview(collectionView)
+		view.bringSubviewToFront(littlePlayerView)
+		[collectionView, littlePlayerView].forEach {
+			view.addSubview($0)
+		}
 	}
 	
 	// MARK: - SetupConstraints
@@ -124,6 +120,12 @@ final class HomeViewController: BaseViewController {
 		collectionView.snp.makeConstraints { make in
 			make.top.bottom.equalTo(view.safeAreaLayoutGuide)
 			make.leading.trailing.equalToSuperview()
+		}
+		
+		littlePlayerView.snp.makeConstraints { make in
+			make.height.equalTo(56)
+			make.left.right.equalToSuperview()
+			make.bottom.equalTo(view.safeAreaLayoutGuide)
 		}
 	}
 }
@@ -155,7 +157,6 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 			default:
 					break
 			}
-			
 			return header
 	}
 	
@@ -202,16 +203,25 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 		case .newRelesedAlbums(_, let dataModel):
 			let album = dataModel[indexPath.row]
 			let viewController = AlbumDetailViewController()
+			viewController.navigationItem.largeTitleDisplayMode = .never
+			viewController.hidesBottomBarWhenPushed = true
 			viewController.albumId = album.id
+			viewController.title = album.name
 			viewController.isAlbumDetail = true
 			self.navigationController?.pushViewController(viewController, animated: true)
 		case .featuredPlaylists(_, let dataModel):
 			let featuredAlbum = dataModel[indexPath.row]
 			let viewController = AlbumDetailViewController()
+			viewController.navigationItem.largeTitleDisplayMode = .never
+			viewController.hidesBottomBarWhenPushed = true
 			viewController.playlistId = featuredAlbum.id
+			viewController.title = featuredAlbum.name
 			self.navigationController?.pushViewController(viewController, animated: true)
 		case .recommended(_, let dataModel):
-			break
+			let playerViewController = PlayerViewController()
+			playerViewController.track = dataModel[indexPath.row]
+			playerViewController.modalPresentationStyle = .overFullScreen
+			present(playerViewController, animated: true)
 		default:
 			break
 		}

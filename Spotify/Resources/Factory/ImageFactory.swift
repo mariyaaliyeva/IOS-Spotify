@@ -15,7 +15,8 @@ final class ImageFactory {
 	backgroundColor: UIColor = .clear,
 	isSkeletonable: Bool = false,
 	skeletonCornerRadius: Float = 4,
-	image: UIImage? = nil
+	image: UIImage? = nil,
+	cornerRadius: CGFloat = 0
 	)
 	-> UIImageView {
 		let imageView = UIImageView()
@@ -25,6 +26,7 @@ final class ImageFactory {
 		imageView.isSkeletonable = isSkeletonable
 		imageView.skeletonCornerRadius = skeletonCornerRadius
 		imageView.image = image
+		imageView.layer.cornerRadius = 0
 		return imageView
 	}
 }

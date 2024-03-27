@@ -32,6 +32,7 @@ final class PlaylistTableViewCell: UITableViewCell {
 	
 	private lazy var titleLabel = LabelFactory.createLabel(
 		font: UIFont(name: "Inter-Regular", size: 16),
+		numberOfLines: 1,
 		isSkeletonable: true
 	)
 	
@@ -48,6 +49,7 @@ final class PlaylistTableViewCell: UITableViewCell {
 	
 	override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
 		super.init(style: style, reuseIdentifier: reuseIdentifier)
+		isSkeletonable = true
 		setupViews()
 	}
 	
@@ -58,22 +60,20 @@ final class PlaylistTableViewCell: UITableViewCell {
 	// MARK: - Public
 	func configure(data: Track) {
 		self.titleLabel.text = data.name
-		let msDuration: Double = Double(data.durationMS ?? 1)
-		let secDuration = msDuration / 1000
-		let durationConvert = secDuration.asString(style: .abbreviated)
-		if data.durationMS != nil {
-			self.subtitleLabel.text = "\(durationConvert)"
-		} else {
-			subtitleLabel.isHidden = true
-		}
+		addTitle(duration: data.durationMS ?? 0)
 	}
 	
 	func configure(data: PlaylistItem) {
 		self.titleLabel.text = data.track?.name
-		let msDuration: Double = Double(data.track?.durationMS ?? 1)
-		let secDuration = msDuration / 1000
-		let durationConvert = secDuration.asString(style: .abbreviated)
-		if data.track?.durationMS != nil {
+		addTitle(duration: data.track?.durationMS ?? 0)
+	}
+	
+	// MARK: - Private
+	
+	private func addTitle(duration: Int?) {
+		let doubleDuration = Double(duration ?? 0)
+		let durationConvert = doubleDuration.asString(style: .abbreviated)
+		if duration != nil {
 			self.subtitleLabel.text = "\(durationConvert)"
 		} else {
 			subtitleLabel.isHidden = true
@@ -115,4 +115,5 @@ final class PlaylistTableViewCell: UITableViewCell {
 		}
 	}
 }
+
 

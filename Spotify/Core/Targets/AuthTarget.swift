@@ -48,14 +48,12 @@ extension AuthTarget: BaseTargetType {
 	
 	var headers: [String : String]? {
 		var headers = [String : String]()
-		
 		let authString = "\(GlobalConstants.AuthApi.clientId):\(GlobalConstants.AuthApi.clientSecret)"
 		guard let authData = authString.data(using: .utf8) else {
 			print("Failure to get base64")
 			return nil
 		}
 		let base64AuthString = authData.base64EncodedString()
-		
 		headers["Authorization"] = "Basic \(base64AuthString)"
 		headers["Content-Type"] = "application/x-www-form-urlencoded"
 		return headers

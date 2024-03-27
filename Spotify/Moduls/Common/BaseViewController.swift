@@ -21,7 +21,7 @@ class BaseViewController: UIViewController {
 	
 	// MARK: - SetupNavBar
 	
-	private func setupNavBar() {
+	func setupNavBar() {
 		let navigationBarAppearance = UINavigationBarAppearance()
 		navigationBarAppearance.configureWithOpaqueBackground()
 		navigationBarAppearance.titleTextAttributes = [

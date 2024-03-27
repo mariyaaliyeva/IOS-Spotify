@@ -36,6 +36,7 @@ final class SettingsViewController: BaseViewController {
 	
 	override func setupTitles() {
 		title = "Settings".localized
+		tableView.reloadData()
 	}
 	
 	// MARK: - SetupNavigationBar
@@ -134,7 +135,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
 	
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		let cell = tableView.dequeueReusableCell(forIndexPath: indexPath) as SettingsTableViewCell
-		
+	
 		cell.didTapProfile = { [weak self] in
 			self?.showProfilePage()
 		}
@@ -142,6 +143,8 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
 		cell.didTapSignOut = { [weak self] in
 			self?.didTapSignOut()
 		}
+		
+		cell.configure()
 		return cell
 	}
 }

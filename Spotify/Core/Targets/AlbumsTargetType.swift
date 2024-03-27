@@ -46,18 +46,12 @@ extension AlbumsTargetType: BaseTargetType {
 				"offset": 0,
 				"limit": 50
 			], encoding: URLEncoding.default)
-		case .getFeaturedPlaylists:
-			return .requestPlain
 		case .getRecommendations(let genres):
 			return .requestParameters(
 				parameters: ["seed_genres": genres],
 				encoding: URLEncoding.default
 			)
-		case .getRecommendedGenres:
-			return .requestPlain
-		case .getAlbumDetail:
-			return .requestPlain
-		case .getPlaylists:
+		case .getFeaturedPlaylists, .getRecommendedGenres, .getAlbumDetail, .getPlaylists:
 			return .requestPlain
 		}
 	}
