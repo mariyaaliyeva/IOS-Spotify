@@ -63,8 +63,10 @@ final class ProfileViewController: BaseViewController {
 				self?.iconImageView.kf.setImage(with: url)
 				self?.nameLabel.text = NSLocalizedString("Full_Name", comment: " ") + ": " + (result.displayName ?? "")
 				self?.emailLabel.text = NSLocalizedString("Email_Address", comment: " ") + ": " + (result.email ?? "")
-				self?.userIDLabel.text = NSLocalizedString("User_ID", comment: " ") + ": " + (result.id)
-				self?.planLabel.text = NSLocalizedString("Plan", comment: " ") + ": " + (result.product)
+				self?.userIDLabel.text = NSLocalizedString("User_ID", comment: " ") + ": " + (result.id ?? "")
+				if result.product != nil {
+					self?.planLabel.text = NSLocalizedString("Plan", comment: " ") + ": " + (result.product ?? "")
+				}
 				self?.iconImageView.hideSkeleton()
 			case .failure(let error):
 				print(error)

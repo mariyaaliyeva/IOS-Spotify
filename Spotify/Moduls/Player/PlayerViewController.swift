@@ -100,7 +100,7 @@ final class PlayerViewController: UIViewController {
 	private let playPauseButton: UIButton = {
 		let button = UIButton(type: .system)
 		let config = UIImage.SymbolConfiguration(pointSize: 45)
-		let image = UIImage(systemName: "play.circle.fill", withConfiguration: config)
+		let image = UIImage(systemName: "pause.circle.fill", withConfiguration: config)
 
 		button.configuration = UIButton.Configuration.filled()
 		button.configuration?.baseBackgroundColor = .clear
@@ -157,10 +157,10 @@ final class PlayerViewController: UIViewController {
 		if isPlay == true {
 			player?.pause()
 			let config = UIImage.SymbolConfiguration(pointSize: 45)
-			playPauseButton.configuration?.image = UIImage(systemName: "pause.circle.fill", withConfiguration: config)
+			playPauseButton.configuration?.image = UIImage(systemName: "play.circle.fill", withConfiguration: config)
 		} else {
 			let config = UIImage.SymbolConfiguration(pointSize: 45)
-			playPauseButton.configuration?.image = UIImage(systemName: "play.circle.fill", withConfiguration: config)
+			playPauseButton.configuration?.image = UIImage(systemName: "pause.circle.fill", withConfiguration: config)
 			player?.play()
 		}
 	}
@@ -232,7 +232,7 @@ final class PlayerViewController: UIViewController {
 	private func setupConstraints() {
 		
 		closeButton.snp.makeConstraints { make in
-			make.top.equalTo(view.safeAreaLayoutGuide).inset(24)
+			make.top.equalTo(view.safeAreaLayoutGuide).inset(12)
 			make.left.equalToSuperview().inset(24)
 			make.size.equalTo(24)
 		}

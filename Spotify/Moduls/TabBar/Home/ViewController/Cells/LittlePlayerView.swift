@@ -9,13 +9,6 @@ import UIKit
 
 final class LittlePlayerView: UIView {
 	
-//	private let musicImageView: UIImageView = {
-//		let imageView = UIImageView()
-//		imageView.image = UIImage(named: "music_little")
-//		imageView.layer.cornerRadius = 2
-//		return imageView
-//	}()
-	
 	private let musicImageView = ImageFactory.createImage(
 		contentMode: .scaleAspectFit,
 		image: UIImage(named: "play_button"),
