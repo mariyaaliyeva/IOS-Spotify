@@ -10,28 +10,18 @@ import Lottie
 
 class BaseViewController: UIViewController {
 	
-	// MARK: - UIView
-	private let loadingView: LoadingView = {
-		let view = LoadingView()
-		view.layer.zPosition = 10
-		view.backgroundColor = UIColor.black.withAlphaComponent(0.3)
-		view.alpha = 0
-		view.frame = view.bounds
-		view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-		return view
-	}()
-	
-	// MARK: - LifeCycle
+	// MARK: - Lifecycle
 	override func viewDidLoad() {
 		super.viewDidLoad()
-		setupNavigationBar()
-		setupLoadingView()
+		setupNavBar()
+		addLanguageObserver()
 	}
 	
-	// MARK: - Navigation bar
+	func setupTitles() { }
 	
-	private func setupNavigationBar() {
-		
+	// MARK: - SetupNavBar
+	
+	func setupNavBar() {
 		let navigationBarAppearance = UINavigationBarAppearance()
 		navigationBarAppearance.configureWithOpaqueBackground()
 		navigationBarAppearance.titleTextAttributes = [
@@ -47,25 +37,19 @@ class BaseViewController: UIViewController {
 		navigationController?.navigationBar.scrollEdgeAppearance = navigationBarAppearance
 	}
 	
-	// MARK: - Methods
-	func showLoader() {
-		DispatchQueue.main.async { [weak self] in
-			self?.loadingView.startLoading()
-		}
+	// MARK: - Observer
+	
+	private func addLanguageObserver() {
+		NotificationCenter.default.addObserver(
+			self,
+			selector: #selector(reloadTitles),
+			name: NSNotification.Name("language"),
+			object: nil
+		)
 	}
 	
-	func hideLoader() {
-		DispatchQueue.main.async { [weak self] in
-			self?.loadingView.stopLoading()
-		}
-	}
-	
-	// MARK: - Private methods
-	private func setupLoadingView() {
-		view.addSubview(loadingView)
-		
-		loadingView.snp.makeConstraints { make in
-			make.edges.equalToSuperview()
-		}
+	@objc
+	private func reloadTitles() {
+		setupTitles()
 	}
 }

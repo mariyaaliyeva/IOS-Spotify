@@ -11,9 +11,9 @@ import Foundation
 // MARK: - ProfileResponse
 struct ProfileResponse: Codable {
 	let country, displayName, email: String?
-	let id: String
+	let id: String?
 	let images: [Image]?
-	let product: String
+	let product: String?
 	
 	enum CodingKeys: String, CodingKey {
 		case country

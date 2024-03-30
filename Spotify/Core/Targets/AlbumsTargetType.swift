@@ -13,6 +13,8 @@ enum AlbumsTargetType {
 	case getFeaturedPlaylists
 	case getRecommendations(genres: String)
 	case getRecommendedGenres
+	case getAlbumDetail(albumID: String)
+	case getPlaylists(playlistID: String)
 }
 
 extension AlbumsTargetType: BaseTargetType {
@@ -30,6 +32,10 @@ extension AlbumsTargetType: BaseTargetType {
 			return "/v1/recommendations"
 		case .getRecommendedGenres:
 			return "/v1/recommendations/available-genre-seeds"
+		case .getAlbumDetail(let albumID):
+			return "v1/albums/\(albumID)"
+		case .getPlaylists(let playlistID):
+			return "/v1/playlists/\(playlistID)"
 		}
 	}
 	
@@ -40,14 +46,12 @@ extension AlbumsTargetType: BaseTargetType {
 				"offset": 0,
 				"limit": 50
 			], encoding: URLEncoding.default)
-		case .getFeaturedPlaylists:
-			return .requestPlain
 		case .getRecommendations(let genres):
 			return .requestParameters(
 				parameters: ["seed_genres": genres],
 				encoding: URLEncoding.default
 			)
-		case .getRecommendedGenres:
+		case .getFeaturedPlaylists, .getRecommendedGenres, .getAlbumDetail, .getPlaylists:
 			return .requestPlain
 		}
 	}

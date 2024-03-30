@@ -8,13 +8,14 @@
 import UIKit
 import SkeletonView
 
-final class HomeViewController: UIViewController {
+final class HomeViewController: BaseViewController {
 	
 	// MARK: - Properties
 	
 	var viewModel: HomeViewModel?
 
 	// MARK: - UI
+	
 	private lazy var collectionView: UICollectionView = {
 		let layout = UICollectionViewCompositionalLayout { sectionIndex, _ ->
 			NSCollectionLayoutSection? in
@@ -32,7 +33,15 @@ final class HomeViewController: UIViewController {
 		collectionView.register(CustomCollectionViewCell.self, forCellWithReuseIdentifier: "CustomCollectionViewCell")
 		collectionView.register(RecomendedCollectionViewCell.self, forCellWithReuseIdentifier: "RecomendedCollectionViewCell")
 		collectionView.isSkeletonable = true
+		collectionView.showsVerticalScrollIndicator = false
 		return collectionView
+	}()
+	
+	private var littlePlayerView: LittlePlayerView = {
+		let view = LittlePlayerView()
+		view.layer.cornerRadius = 4
+		view.isHidden = true
+		return view
 	}()
 	
 	// MARK: - Lifecycle
@@ -54,19 +63,6 @@ final class HomeViewController: UIViewController {
 		navigationItem.largeTitleDisplayMode = .automatic
 		
 		navigationItem.setBackBarItem()
-		let navigationBarAppearance = UINavigationBarAppearance()
-		navigationBarAppearance.configureWithOpaqueBackground()
-		navigationBarAppearance.titleTextAttributes = [
-			NSAttributedString.Key.foregroundColor: UIColor.white
-		]
-		navigationBarAppearance.largeTitleTextAttributes = [
-			NSAttributedString.Key.foregroundColor: UIColor.white
-		]
-		navigationBarAppearance.backgroundColor = .black
-		
-		navigationController?.navigationBar.standardAppearance = navigationBarAppearance
-		navigationController?.navigationBar.compactAppearance = navigationBarAppearance
-		navigationController?.navigationBar.scrollEdgeAppearance = navigationBarAppearance
 		
 		navigationItem.rightBarButtonItem = UIBarButtonItem(
 			image: UIImage(named: "settings_icon"),
@@ -88,6 +84,12 @@ final class HomeViewController: UIViewController {
 		navigationController?.pushViewController(controller, animated: true)
 	}
 	
+	override func setupTitles() {
+		title = "Home".localized
+		viewModel?.setupSectionTitles()
+		collectionView.reloadData()
+	}
+	
 	// MARK: - SetupViewModel()
 	
 	private func setupViewModel() {
@@ -96,39 +98,20 @@ final class HomeViewController: UIViewController {
 			usingGradient: .init(baseColor: .skeletonDefault),
 			animation: nil,
 			transition: .crossDissolve(0.25))
-		viewModel?.didLoad()
-		
-		let group = DispatchGroup()
-		
-		group.enter()
-		self.viewModel?.loadNewRealisedAlbums(completion: { [weak self] result in
-			group.leave()
+		viewModel?.didLoad(completion: { [weak self] in
+			self?.collectionView.stopSkeletonAnimation()
+			self?.collectionView.hideSkeleton(reloadDataAfter: true, transition: .crossDissolve(0.25))
 		})
-		
-		group.enter()
-		self.viewModel?.loadFeaturedPlaylists(completion: { [weak self] result  in
-			group.leave()
-		})
-
-		group.enter()
-		self.viewModel?.loadRecommended(completion: { [weak self] result in
-			group.leave()
-		})
-
-		group.notify(queue: .main) {
-			DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-				self.collectionView.stopSkeletonAnimation()
-				self.collectionView.hideSkeleton(reloadDataAfter: true, transition: .crossDissolve(0.25))
-				self.collectionView.reloadData()
-			}
-		}
 	}
 	
 	// MARK: - SetupViews
 	
 	private func setupViews() {
 		view.backgroundColor = .black
-		view.addSubview(collectionView)
+		view.bringSubviewToFront(littlePlayerView)
+		[collectionView, littlePlayerView].forEach {
+			view.addSubview($0)
+		}
 	}
 	
 	// MARK: - SetupConstraints
@@ -138,12 +121,18 @@ final class HomeViewController: UIViewController {
 			make.top.bottom.equalTo(view.safeAreaLayoutGuide)
 			make.leading.trailing.equalToSuperview()
 		}
+		
+		littlePlayerView.snp.makeConstraints { make in
+			make.height.equalTo(56)
+			make.left.right.equalToSuperview()
+			make.bottom.equalTo(view.safeAreaLayoutGuide)
+		}
 	}
 }
 
 // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
 
-extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSource, SkeletonCollectionViewDataSource {
+extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSource {
 
 	func numberOfSections(in collectionView: UICollectionView) -> Int {
 		return viewModel?.numberOfSections ?? 1
@@ -168,7 +157,6 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 			default:
 					break
 			}
-			
 			return header
 	}
 	
@@ -207,6 +195,42 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 				return UICollectionViewCell()
 		}
 	}
+	
+	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+		let type = viewModel?.getSectionViewModel(at: indexPath.section)
+		
+		switch type {
+		case .newRelesedAlbums(_, let dataModel):
+			let album = dataModel[indexPath.row]
+			let viewController = AlbumDetailViewController()
+			viewController.navigationItem.largeTitleDisplayMode = .never
+			viewController.hidesBottomBarWhenPushed = true
+			viewController.albumId = album.id
+			viewController.title = album.name
+			viewController.isAlbumDetail = true
+			self.navigationController?.pushViewController(viewController, animated: true)
+		case .featuredPlaylists(_, let dataModel):
+			let featuredAlbum = dataModel[indexPath.row]
+			let viewController = AlbumDetailViewController()
+			viewController.navigationItem.largeTitleDisplayMode = .never
+			viewController.hidesBottomBarWhenPushed = true
+			viewController.playlistId = featuredAlbum.id
+			viewController.title = featuredAlbum.name
+			self.navigationController?.pushViewController(viewController, animated: true)
+		case .recommended(_, let dataModel):
+			let playerViewController = PlayerViewController()
+			playerViewController.track = dataModel[indexPath.row]
+			playerViewController.modalPresentationStyle = .overFullScreen
+			present(playerViewController, animated: true)
+		default:
+			break
+		}
+	}
+}
+
+// MARK: - SkeletonCollectionViewDataSource
+
+extension HomeViewController: SkeletonCollectionViewDataSource {
 	
 	func numSections(in collectionSkeletonView: UICollectionView) -> Int {
 			return viewModel?.numberOfSections ?? 1
@@ -249,9 +273,9 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
 	}
 }
 
+// MARK: - CreateCollectionLayout
+
 extension HomeViewController {
-	
-	// MARK: - CreateCollectionLayout
 	
 	private func createCollectionLayout(section: Int) -> NSCollectionLayoutSection {
 		
@@ -263,7 +287,7 @@ extension HomeViewController {
 				heightDimension: .fractionalHeight(1.0))
 			
 			let item = NSCollectionLayoutItem(layoutSize: itemSize)
-			item.contentInsets = .init(top: 2, leading: 2, bottom: 2, trailing: 2)
+			item.contentInsets = .init(top: 2, leading: 4, bottom: 2, trailing: 4)
 			// Group
 			
 			let horizontalGroup = NSCollectionLayoutGroup.horizontal (
@@ -293,7 +317,7 @@ extension HomeViewController {
 				heightDimension: .fractionalHeight(1.0))
 			
 			let item = NSCollectionLayoutItem(layoutSize: itemSize)
-			item.contentInsets = .init(top: 2, leading: 2, bottom: 2, trailing: 2)
+			item.contentInsets = .init(top: 2, leading: 4, bottom: 2, trailing: 4)
 			// Group
 			
 			let horizontalGroup = NSCollectionLayoutGroup.horizontal (
@@ -370,3 +394,5 @@ extension HomeViewController {
 		}
 	}
 }
+
+//0S4pP8MBY9p7ngFWIZQAJv

@@ -7,7 +7,14 @@
 
 import UIKit
 
-final class SettingsViewController: UIViewController {
+final class SettingsViewController: BaseViewController {
+	
+	private var currentLanguage: SupportedLanguages? {
+			didSet {
+					guard let currentLanguage else { return }
+					didChange(language: currentLanguage)
+			}
+	}
 	
 	// MARK: - UI
 	private lazy var tableView: UITableView = {
@@ -23,7 +30,53 @@ final class SettingsViewController: UIViewController {
 	// MARK: - Lifecycle
 	override func viewDidLoad() {
 		super.viewDidLoad()
+		setupNavigationBar()
 		setupViews()
+	}
+	
+	override func setupTitles() {
+		title = "Settings".localized
+		tableView.reloadData()
+	}
+	
+	// MARK: - SetupNavigationBar
+	
+	private func setupNavigationBar() {
+		title = "Settings".localized
+		navigationItem.rightBarButtonItem = UIBarButtonItem(
+			image: UIImage(named: "icon_language"),
+			style: .done,
+			target: self,
+			action: #selector(didTapChangeLanguage)
+		)
+	}
+	
+	// MARK: - Button actions
+	
+	@objc
+	private func didTapChangeLanguage() {
+		let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+		SupportedLanguages.all.forEach { language in
+			alert.addAction(
+				.init(
+					title: language.localizedTitle,
+					style: .default,
+					handler: { [weak self] _ in
+						self?.currentLanguage = language
+					}
+				)
+			)
+		}
+		
+		alert.addAction(.init(title: "Cancel".localized, style: .cancel))
+		self.present(alert, animated: true, completion: nil)
+	}
+	
+	private func didChange(language: SupportedLanguages) {
+		Bundle.setLanguage(language: language.rawValue)
+		DispatchQueue.main.async {
+			NotificationCenter.default.post(name: NSNotification.Name("language"), object: nil)
+		}
 	}
 	
 	// MARK: - SetupViews
@@ -41,7 +94,7 @@ final class SettingsViewController: UIViewController {
 	
 	private func showProfilePage() {
 		let controller = ProfileViewController()
-		controller.title = "Profile"
+		controller.title = "Profile".localized
 		navigationController?.pushViewController(controller, animated: true)
 	}
 	
@@ -82,7 +135,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
 	
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		let cell = tableView.dequeueReusableCell(forIndexPath: indexPath) as SettingsTableViewCell
-		
+	
 		cell.didTapProfile = { [weak self] in
 			self?.showProfilePage()
 		}
@@ -90,6 +143,8 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
 		cell.didTapSignOut = { [weak self] in
 			self?.didTapSignOut()
 		}
+		
+		cell.configure()
 		return cell
 	}
 }

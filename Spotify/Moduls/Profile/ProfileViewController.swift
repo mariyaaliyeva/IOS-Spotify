@@ -9,50 +9,31 @@ import UIKit
 import Kingfisher
 import SkeletonView
 
-final class ProfileViewController: UIViewController {
+final class ProfileViewController: BaseViewController {
 	
 	// MARK: - UI
-	private lazy var iconImageView: UIImageView = {
-		let imageView = UIImageView()
-		imageView.contentMode = .scaleAspectFill
-		imageView.clipsToBounds = true
-		imageView.backgroundColor = #colorLiteral(red: 0.8797428012, green: 0.8797428012, blue: 0.8797428012, alpha: 1)
-		imageView.isSkeletonable = true
-		imageView.skeletonCornerRadius = 60
-		return imageView
-	}()
 	
-	private lazy var nameLabel: UILabel = {
-		let label = UILabel()
-		label.textColor = .white
-		label.textAlignment = .left
-		label.font = UIFont(name: "HelveticaNeue", size: 16)
-		return label
-	}()
+	private lazy var iconImageView = ImageFactory.createImage(
+		backgroundColor: #colorLiteral(red: 0.8797428012, green: 0.8797428012, blue: 0.8797428012, alpha: 1),
+		isSkeletonable: true,
+		skeletonCornerRadius: 60
+	)
 	
-	private lazy var emailLabel: UILabel = {
-		let label = UILabel()
-		label.textColor = .white
-		label.textAlignment = .left
-		label.font = UIFont(name: "HelveticaNeue", size: 16)
-		return label
-	}()
+	private lazy var nameLabel = LabelFactory.createLabel(
+		font: UIFont(name: "HelveticaNeue", size: 16)
+	)
 	
-	private lazy var userIDLabel: UILabel = {
-		let label = UILabel()
-		label.textColor = .white
-		label.textAlignment = .left
-		label.font = UIFont(name: "HelveticaNeue", size: 16)
-		return label
-	}()
+	private lazy var emailLabel = LabelFactory.createLabel(
+		font: UIFont(name: "HelveticaNeue", size: 16)
+	)
 	
-	private lazy var planLabel: UILabel = {
-		let label = UILabel()
-		label.textColor = .white
-		label.textAlignment = .left
-		label.font = UIFont(name: "HelveticaNeue", size: 16)
-		return label
-	}()
+	private lazy var userIDLabel = LabelFactory.createLabel(
+		font: UIFont(name: "HelveticaNeue", size: 16)
+	)
+	
+	private lazy var planLabel = LabelFactory.createLabel(
+		font: UIFont(name: "HelveticaNeue", size: 16)
+	)
 	
 	// MARK: - Lifecycle
 	override func viewDidLoad() {
@@ -60,6 +41,10 @@ final class ProfileViewController: UIViewController {
 		setupViews()
 		setupConstraints()
 		loadUserProfile()
+	}
+	
+	override func setupTitles() {
+		title = "Profile".localized
 	}
 	
 	// MARK: - ViewDidLayoutSubviews
@@ -76,10 +61,12 @@ final class ProfileViewController: UIViewController {
 			case .success(let result):
 				let url = URL(string: result.images?.first?.url ?? "")
 				self?.iconImageView.kf.setImage(with: url)
-				self?.nameLabel.text = "Full Name: \(result.displayName ?? "")"
-				self?.emailLabel.text = "Email Address: \(result.email ?? "")"
-				self?.userIDLabel.text = "User ID: \(result.id)"
-				self?.planLabel.text = "Plan: \(result.product) "
+				self?.nameLabel.text = NSLocalizedString("Full_Name", comment: " ") + ": " + (result.displayName ?? "")
+				self?.emailLabel.text = NSLocalizedString("Email_Address", comment: " ") + ": " + (result.email ?? "")
+				self?.userIDLabel.text = NSLocalizedString("User_ID", comment: " ") + ": " + (result.id ?? "")
+				if result.product != nil {
+					self?.planLabel.text = NSLocalizedString("Plan", comment: " ") + ": " + (result.product ?? "")
+				}
 				self?.iconImageView.hideSkeleton()
 			case .failure(let error):
 				print(error)
@@ -89,6 +76,7 @@ final class ProfileViewController: UIViewController {
 	
 	// MARK: - SetupViews
 	private func setupViews() {
+		title = "Profile".localized
 		view.backgroundColor = .black
 		
 		[iconImageView, nameLabel, emailLabel, userIDLabel, planLabel].forEach {

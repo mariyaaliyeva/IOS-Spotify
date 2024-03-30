@@ -23,27 +23,15 @@ final class CustomCollectionViewCell: UICollectionViewCell {
 	
 	// MARK: - UI
 	
-	private lazy var albumImageView: UIImageView = {
-		let imageView = UIImageView()
-		imageView.contentMode = .scaleAspectFit
-		imageView.isSkeletonable = true
-		imageView.skeletonCornerRadius = 8
-		return imageView
-	}()
-	
-	private lazy var albumNameLabel: UILabel = {
-		let label = UILabel()
-		label.textAlignment = .center
-		label.textColor = .white
-		label.font = UIFont(name: "HelveticaNeue", size: 16)
-		label.numberOfLines = 2
-		label.lineBreakMode = .byWordWrapping
-		label.sizeToFit()
-		label.layer.masksToBounds = true
-		label.linesCornerRadius = 2
-		label.isSkeletonable = true
-		return label
-	}()
+	private lazy var albumImageView = ImageFactory.createImage(
+		isSkeletonable: true,
+		skeletonCornerRadius: 8
+	)
+
+	private lazy var albumNameLabel = LabelFactory.createLabel(
+		font: UIFont(name: "HelveticaNeue", size: 16),
+		isSkeletonable: true
+	)
 	
 	// MARK: - Lifecycle
 	override init(frame: CGRect) {
@@ -59,7 +47,6 @@ final class CustomCollectionViewCell: UICollectionViewCell {
 	
 	override func layoutSubviews() {
 		super.layoutSubviews()
-		albumImageView.clipsToBounds = true
 		albumImageView.layer.cornerRadius = Consraints.musicImageCornerRadius
 	}
 	
@@ -92,8 +79,9 @@ final class CustomCollectionViewCell: UICollectionViewCell {
 		backgroundColor = .clear
 		isSkeletonable = true
 		contentView.isSkeletonable = true
-		contentView.addSubview(albumImageView)
-		contentView.addSubview(albumNameLabel)
+		[albumImageView, albumNameLabel].forEach {
+			contentView.addSubview($0)
+		}
 	}
 	
 	// MARK: - Setup Constraints
