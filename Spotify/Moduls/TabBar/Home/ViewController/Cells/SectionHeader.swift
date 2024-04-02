@@ -31,6 +31,10 @@ final class SectionHeader: UICollectionReusableView {
 		label.text = text
 	}
 	
+	func fontConfigure(font: UIFont) {
+		label.font = font
+	}
+	
 	// MARK: - SetupViews
 	private func setupViews() {
 		addSubview(label)
