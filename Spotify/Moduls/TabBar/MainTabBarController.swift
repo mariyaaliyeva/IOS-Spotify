@@ -19,10 +19,10 @@ final class MainTabBarController: UITabBarController {
 	
 	private var allViewController = [
 		UINavigationController(rootViewController: HomeViewController()),
-		SearchViewController(),
-		LibraryViewController()
+		UINavigationController(rootViewController: SearchViewController()),
+		UINavigationController(rootViewController: LibraryViewController())
 	]
-	
+
 	// MARK: - Lifecycle
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -34,9 +34,14 @@ final class MainTabBarController: UITabBarController {
 	
 	private func makeTabBarViews() {
 		tabBar.tintColor = .white
+		tabBar.barTintColor = .white //
 		tabBar.backgroundColor = .black
-		UITabBar.appearance().barTintColor = .black
+	//	UITabBar.appearance().barTintColor = .black
 		setViewControllers(allViewController, animated: false)
+		
+		allViewController.forEach {
+			$0.navigationBar.prefersLargeTitles = true
+		}
 		
 		guard let items = self.tabBar.items else {return}
 		
@@ -44,5 +49,21 @@ final class MainTabBarController: UITabBarController {
 			items[i].title = titles[i]
 			items[i].image = icons[i]
 		}
+		
+		let tabbarAppearance = UITabBarAppearance()
+		tabbarAppearance.configureWithOpaqueBackground()
+		tabbarAppearance.backgroundColor = .black
+		tabBar.standardAppearance = tabbarAppearance
+		tabBar.scrollEdgeAppearance = tabbarAppearance
 	}
 }
+
+//tabBar.tintColor = .white
+//tabBar.barTintColor = .white
+//tabBar.backgroundColor = .black
+//
+//let tabbarAppearance = UITabBarAppearance()
+//tabbarAppearance.configureWithOpaqueBackground()
+//tabbarAppearance.backgroundColor = .black
+//tabBar.standardAppearance = tabbarAppearance
+//tabBar.scrollEdgeAppearance = tabbarAppearance

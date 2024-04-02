@@ -116,7 +116,6 @@ final class PlayerViewController: UIViewController {
 		super.viewDidLoad()
 		setupViews()
 		setupConstraints()
-		view.backgroundColor = .alizarin
 	}
 	
 	override func viewWillAppear(_ animated: Bool) {
