@@ -25,8 +25,8 @@ Full featured Spotify like app written in Swift with MVVM architecture..
 * Localization
 
 ## Screenshots
-https://github.com/mariyaaliyeva/IOS-Spotify/files/15050742/default.pdf
-https://github.com/mariyaaliyeva/IOS-Spotify/files/15050743/1.pdf
+[Дизайн без названия.pdf](https://github.com/mariyaaliyeva/IOS-Spotify/files/15050747/default.pdf)
+
 
 ### Libraries
 
